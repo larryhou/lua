@@ -3,3 +3,122 @@
 --- Created by larryhou.
 --- DateTime: 2018/9/3 9:56 PM
 ---
+
+
+--print(io.open("/etc/hosts", 'r'))
+fp = assert(io.open("/etc/hosts", 'r'))
+print(fp:read('l'))
+for line in fp:lines() do
+    print(line)
+end
+
+print(fp:seek())
+print(fp:read('l'))
+
+print(fp:seek('set', 0))
+print(fp:read('l'))
+
+download_dir = os.getenv('HOME')..'/Downloads'
+
+function redirect_stream(f, t)
+    print(f, t)
+    temp_input = io.input()
+    temp_output = io.output()
+    if f then
+        io.input(io.open(f, 'r'))
+    end
+    if t then
+        if os.execute('test -f '..t) then
+            print('OVERRIDE CONFIRM ... ')
+            prompt = io.stdin:read(1)
+            if string.lower(prompt) ~= 'y' then
+                print('DENY')
+                os.exit()
+            end
+            print('AGREE')
+        end
+        io.output(io.open(t, 'w'))
+    end
+
+    for block in io.input():lines('L') do
+        if not block then break end
+        io.write(block)
+        io.flush()
+    end
+
+    io.input(temp_input)
+    io.output(temp_output)
+end
+
+function read_by_byte(f)
+    fp = io.open(f)
+    while true do
+        char = fp:read(1)
+        if not char then break end
+    end
+    fp:close()
+end
+
+function read_by_line(f)
+    fp = io.open(f)
+    for line in fp:lines() do
+
+    end
+    fp:close()
+end
+
+function read_by_chunk(f)
+    fp = io.open(f)
+    for line in fp:lines(2^13) do
+
+    end
+    fp:close()
+end
+
+function read_whole_file(f)
+    fp = io.open(f)
+    fp:read('a')
+    fp:close()
+end
+
+function tail_of_file(f, num)
+    num = num or 1
+    fp = io.open(f, 'r')
+    fsize = fp:seek('end')
+    fp:seek('cur', -1)
+    newline_count = 0
+    while true do
+        if fp:read(1) == '\n' then
+            position = fp:seek('cur')
+            newline_count = newline_count + 1
+            if newline_count >= num then
+                print(fp:read('a'))
+                break
+            else
+                fp:seek('cur', -2)
+            end
+        else
+            fp:seek('cur', -2)
+        end
+    end
+    fp:close()
+end
+
+function dump_directory_entries(f)
+    fp = io.popen('ls '..f)
+    print(fp:read('a'))
+end
+
+--redirect_stream()
+--redirect_stream(nil,download_dir..'/lua_write.txt')
+--redirect_stream('/etc/hosts', download_dir..'/lua_write.txt')
+
+data_path = download_dir..'/data.txt'
+--read_by_byte(data_path)
+--read_by_line(data_path)
+--read_by_chunk(data_path)
+--read_whole_file(data_path)
+
+tail_of_file(data_path, 10)
+
+dump_directory_entries(download_dir)
