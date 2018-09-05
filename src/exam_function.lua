@@ -29,9 +29,10 @@ function shuffle(array)
     for n = 1, length do
         position = length - n + 1
         index = math.random(1, position)
-        value = array[position]
-        array[position] = array[index]
-        array[index] = value
+        array[position], array[index] = array[index], array[position]
+        --value = array[position]
+        --array[position] = array[index]
+        --array[index] = value
     end
 end
 
